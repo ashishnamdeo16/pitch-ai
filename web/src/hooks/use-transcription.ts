@@ -1,47 +1,49 @@
 "use client";
 
-import { USE_DEEPGRAM } from "@/lib/constants";
-import { useDeepgramRecognition } from "./use-deepgram-recognition";
-import { useSpeechRecognition } from "./use-speech-recognition";
+import { hasWebSpeech, useSpeechRecognition } from "./use-speech-recognition";
+import { useGroqTranscription } from "./use-groq-transcription";
 
 interface UseTranscriptionOptions {
   onResult: (text: string, isFinal: boolean) => void;
   onError?: (error: string) => void;
-  sendAudioChunk?: (data: string, sequence: number) => void;
   language?: string;
 }
 
 /**
- * Unified STT hook — Deepgram (server-side) when enabled, else Web Speech API.
+ * STT: Web Speech API (primary) → Groq Whisper via /api/transcribe (fallback).
  */
 export function useTranscription({
   onResult,
   onError,
-  sendAudioChunk,
   language,
 }: UseTranscriptionOptions) {
+  const useWebSpeech =
+    typeof window !== "undefined" ? hasWebSpeech() : true;
+
   const webSpeech = useSpeechRecognition({
     onResult,
     onError,
     language,
-    enabled: !USE_DEEPGRAM,
+    enabled: useWebSpeech,
   });
 
-  const deepgram = useDeepgramRecognition({
+  const groq = useGroqTranscription({
+    onResult,
     onError,
-    sendAudioChunk: sendAudioChunk ?? (() => {}),
-    enabled: USE_DEEPGRAM,
+    enabled: !useWebSpeech,
   });
 
-  if (USE_DEEPGRAM) {
+  if (useWebSpeech) {
     return {
-      ...deepgram,
-      provider: "deepgram" as const,
+      ...webSpeech,
+      sttMode: "webspeech" as const,
+      provider: "webspeech" as const,
     };
   }
 
   return {
-    ...webSpeech,
-    provider: "webspeech" as const,
+    ...groq,
+    sttMode: "groq" as const,
+    provider: "groq" as const,
   };
 }

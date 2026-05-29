@@ -22,7 +22,6 @@ import { ActivityFeed } from "@/components/dashboard/activity-feed";
 import { useSessionStore } from "@/store/session-store";
 import { usePitchSocket } from "@/hooks/use-pitch-socket";
 import { useTranscription } from "@/hooks/use-transcription";
-import { USE_DEEPGRAM } from "@/lib/constants";
 import { waitForSessionReady } from "@/lib/wait-for-session-ready";
 import { useKeyboardShortcuts } from "@/hooks/use-keyboard-shortcuts";
 import { formatDuration } from "@/lib/utils";
@@ -66,13 +65,11 @@ export function PracticeSession({ userId }: { userId: string }) {
     setCountdown,
   } = useSessionStore();
 
-  const { sendTranscript, sendAudioChunk, endSession, pauseSession } = usePitchSocket(userId);
+  const { sendTranscript, endSession, pauseSession } = usePitchSocket(userId);
 
   const onSpeechResult = useCallback(
     (text: string, isFinal: boolean) => {
-      if (!USE_DEEPGRAM) {
-        sendTranscript(text, isFinal);
-      }
+      sendTranscript(text, isFinal);
     },
     [sendTranscript]
   );
@@ -80,7 +77,6 @@ export function PracticeSession({ userId }: { userId: string }) {
   const { isListening, isSupported, start, stop, provider } = useTranscription({
     onResult: onSpeechResult,
     onError: (e) => console.warn("STT:", e),
-    sendAudioChunk,
   });
 
   const startSession = async () => {
@@ -224,7 +220,7 @@ export function PracticeSession({ userId }: { userId: string }) {
           <h1 className="text-2xl font-bold text-white">Practice Session</h1>
           <p className="text-sm text-zinc-500">
             {isRecording ? formatDuration(durationSeconds) : "Press start to begin"} ·{" "}
-            STT: {provider === "deepgram" ? "Deepgram" : "Web Speech"}
+            STT: {provider === "groq" ? "Groq Whisper" : "Web Speech"}
             {!isSupported && " · STT may be limited in this browser"}
           </p>
         </div>

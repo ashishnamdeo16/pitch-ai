@@ -5,11 +5,6 @@ import {
   getSession,
 } from "./session-manager.js";
 import { highlightFillersInText } from "./lib/analysis.js";
-import {
-  forwardAudioChunk,
-  startDeepgramSession,
-  stopDeepgramSession,
-} from "./lib/deepgram.js";
 
 /** Broadcast transcript analysis to all clients in a session room */
 export async function pipelineTranscript(
@@ -21,6 +16,12 @@ export async function pipelineTranscript(
   isFinal: boolean,
   durationSeconds: number
 ): Promise<void> {
+  // Interim results are cumulative — preview only, do not append
+  if (!isFinal) {
+    await pipelineInterimTranscript(io, sessionId, text);
+    return;
+  }
+
   const result = await processTranscriptChunk(
     sessionId,
     text,
@@ -46,7 +47,7 @@ export async function pipelineTranscript(
   });
 }
 
-/** Interim Deepgram tokens — preview without mutating accumulated session text */
+/** Interim STT tokens — preview without mutating accumulated session text */
 export async function pipelineInterimTranscript(
   io: Server,
   sessionId: string,
@@ -66,34 +67,3 @@ export async function pipelineInterimTranscript(
     isFinal: false,
   });
 }
-
-export async function attachDeepgram(
-  io: Server,
-  sessionId: string,
-  socketId: string,
-  userId: string,
-  language: string,
-  durationSeconds: () => number
-): Promise<void> {
-  await startDeepgramSession(sessionId, language, async (text, isFinal) => {
-    if (isFinal) {
-      await pipelineTranscript(
-        io,
-        sessionId,
-        userId,
-        socketId,
-        text,
-        true,
-        durationSeconds()
-      );
-    } else {
-      await pipelineInterimTranscript(io, sessionId, text);
-    }
-  });
-}
-
-export function detachDeepgram(sessionId: string): void {
-  stopDeepgramSession(sessionId);
-}
-
-export { forwardAudioChunk };

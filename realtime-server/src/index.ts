@@ -9,12 +9,7 @@ import {
   clearSession,
 } from "./session-manager.js";
 import type { InvestorPersonality } from "./types.js";
-import {
-  attachDeepgram,
-  detachDeepgram,
-  pipelineTranscript,
-} from "./transcript-pipeline.js";
-import { forwardAudioChunk } from "./lib/deepgram.js";
+import { pipelineTranscript } from "./transcript-pipeline.js";
 import { verifyWsToken } from "./lib/ws-auth.js";
 
 const PORT = parseInt(process.env.PORT || process.env.WS_PORT || "3001", 10);
@@ -45,7 +40,7 @@ const io = new Server(httpServer, {
   cors: { origin: CORS_ORIGIN, credentials: true },
   pingInterval: HEARTBEAT_MS,
   pingTimeout: HEARTBEAT_MS + 5000,
-  maxHttpBufferSize: 512000, // 512KB — sufficient for webm chunks, limits abuse
+  maxHttpBufferSize: 512000,
 });
 
 /** Per-socket rate limits keyed by event type */
@@ -72,7 +67,6 @@ function checkRateLimit(
 
 const LIMITS = {
   transcript: parseInt(process.env.RATE_LIMIT_TRANSCRIPT_PER_MIN || "120", 10),
-  audio: parseInt(process.env.RATE_LIMIT_AUDIO_PER_MIN || "240", 10),
   investor: parseInt(process.env.RATE_LIMIT_INVESTOR_PER_MIN || "20", 10),
 };
 
@@ -81,7 +75,6 @@ io.on("connection", (socket: Socket) => {
   let userId: string | null = null;
   let durationSeconds = 0;
   let durationTimer: ReturnType<typeof setInterval> | null = null;
-  let sttProvider: "webspeech" | "deepgram" = "webspeech";
   let authenticated = false;
 
   socket.on(
@@ -90,7 +83,6 @@ io.on("connection", (socket: Socket) => {
       sessionId: string;
       userId: string;
       token: string;
-      stt?: "webspeech" | "deepgram";
       language?: string;
     }) => {
       if (!payload.token) {
@@ -112,7 +104,6 @@ io.on("connection", (socket: Socket) => {
 
       sessionId = payload.sessionId;
       userId = payload.userId;
-      sttProvider = payload.stt ?? "webspeech";
       authenticated = true;
 
       await socket.join(`session:${sessionId}`);
@@ -122,37 +113,17 @@ io.on("connection", (socket: Socket) => {
         durationSeconds += 1;
       }, 1000);
 
-      if (sttProvider === "deepgram") {
-        try {
-          await attachDeepgram(
-            io,
-            sessionId,
-            socket.id,
-            userId,
-            payload.language ?? "en-US",
-            () => durationSeconds
-          );
-        } catch (err) {
-          console.error("[deepgram] failed to start:", err);
-          socket.emit("stt:error", {
-            provider: "deepgram",
-            message: "Deepgram unavailable — use browser speech",
-          });
-          sttProvider = "webspeech";
-        }
-      }
-
       socket.emit("session:ready", {
         sessionId,
         heartbeatMs: HEARTBEAT_MS,
-        stt: sttProvider,
+        stt: "webspeech",
       });
     }
   );
 
   socket.on(
     "transcript:chunk",
-    async (payload: { text: string; isFinal?: boolean }) => {
+    async (payload: { text: string; isFinal?: boolean; wordCount?: number }) => {
       if (!authenticated || !sessionId || !userId) return;
       if (!checkRateLimit(socket.id, "transcript", LIMITS.transcript)) {
         socket.emit("error", { code: "RATE_LIMIT", message: "Too many events" });
@@ -173,18 +144,6 @@ io.on("connection", (socket: Socket) => {
       );
     }
   );
-
-  socket.on("audio:chunk", (payload: { data: string; sequence: number }) => {
-    if (!authenticated || !sessionId) return;
-    if (!checkRateLimit(socket.id, "audio", LIMITS.audio)) {
-      socket.emit("error", { code: "RATE_LIMIT", message: "Audio rate limited" });
-      return;
-    }
-    if (sttProvider === "deepgram" && payload.data) {
-      forwardAudioChunk(sessionId, payload.data.slice(0, 700000));
-    }
-    socket.emit("audio:ack", { sequence: payload.sequence });
-  });
 
   socket.on(
     "investor:ask",
@@ -219,7 +178,6 @@ io.on("connection", (socket: Socket) => {
   socket.on("session:end", () => {
     if (durationTimer) clearInterval(durationTimer);
     if (sessionId) {
-      detachDeepgram(sessionId);
       io.to(`session:${sessionId}`).emit("session:ended", { durationSeconds });
       void clearSession(sessionId);
     }
@@ -227,7 +185,6 @@ io.on("connection", (socket: Socket) => {
 
   socket.on("disconnect", () => {
     if (durationTimer) clearInterval(durationTimer);
-    if (sessionId) detachDeepgram(sessionId);
     rateLimits.delete(socket.id);
   });
 });

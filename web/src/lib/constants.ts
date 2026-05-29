@@ -68,7 +68,7 @@ export const PRICING_PLANS = [
       "Unlimited sessions",
       "Investor simulation",
       "PDF reports",
-      "Deepgram STT",
+      "Groq Whisper fallback",
       "Shark Tank mode",
     ],
     cta: "Go Pro",
@@ -92,5 +92,3 @@ export const PRICING_PLANS = [
 export const WS_URL =
   process.env.NEXT_PUBLIC_WS_URL || "http://localhost:3001";
 
-export const USE_DEEPGRAM =
-  process.env.NEXT_PUBLIC_USE_DEEPGRAM === "true";

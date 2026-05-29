@@ -2,7 +2,7 @@
 
 import { useCallback, useEffect, useRef } from "react";
 import { io, type Socket } from "socket.io-client";
-import { WS_URL, USE_DEEPGRAM } from "@/lib/constants";
+import { WS_URL } from "@/lib/constants";
 import { useSessionStore } from "@/store/session-store";
 import type { AIFeedbackItem, SessionMetrics, StructureItem } from "@/types";
 
@@ -54,7 +54,6 @@ export function usePitchSocket(userId: string) {
         sessionId: sid,
         userId,
         token,
-        stt: USE_DEEPGRAM ? "deepgram" : "webspeech",
         language: "en-US",
       });
     },
@@ -83,9 +82,7 @@ export function usePitchSocket(userId: string) {
         void joinSession(socket, sid);
         addActivity({
           type: "ws",
-          message: USE_DEEPGRAM
-            ? "Connected — Deepgram STT active"
-            : "Connected to realtime coach",
+          message: "Connected to realtime coach",
         });
       });
 
@@ -94,21 +91,11 @@ export function usePitchSocket(userId: string) {
         addActivity({ type: "ws", message: "Reconnecting…" });
       });
 
-      socket.on("session:ready", (data: { stt?: string }) => {
+      socket.on("session:ready", () => {
         setSessionReady(true);
         addActivity({
           type: "session",
-          message:
-            data.stt === "deepgram"
-              ? "Deepgram STT ready — start speaking"
-              : "Session ready — start pitching",
-        });
-      });
-
-      socket.on("stt:error", (err: { provider?: string; message?: string }) => {
-        addActivity({
-          type: "ws",
-          message: err.message || "Speech recognition unavailable",
+          message: "Session ready — start pitching",
         });
       });
 
@@ -191,12 +178,8 @@ export function usePitchSocket(userId: string) {
 
   const sendTranscript = useCallback((text: string, isFinal = false) => {
     if (!useSessionStore.getState().isSessionReady) return;
-    socketRef.current?.emit("transcript:chunk", { text, isFinal });
-  }, []);
-
-  const sendAudioChunk = useCallback((data: string, sequence: number) => {
-    if (!useSessionStore.getState().isSessionReady) return;
-    socketRef.current?.emit("audio:chunk", { data, sequence });
+    const wordCount = text.trim().split(/\s+/).filter(Boolean).length;
+    socketRef.current?.emit("transcript:chunk", { text, isFinal, wordCount });
   }, []);
 
   const askInvestor = useCallback((personality: string) => {
@@ -234,7 +217,6 @@ export function usePitchSocket(userId: string) {
 
   return {
     sendTranscript,
-    sendAudioChunk,
     askInvestor,
     endSession,
     pauseSession,

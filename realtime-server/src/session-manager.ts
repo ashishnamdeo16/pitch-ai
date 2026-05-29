@@ -81,9 +81,10 @@ export async function processTranscriptChunk(
   const session = await getSession(sessionId);
   if (!session) return null;
   if (expectedUserId && session.userId !== expectedUserId) return null;
+  if (!isFinal) return null;
 
   session.sequence += 1;
-  session.transcript += (isFinal ? " " : "") + text;
+  session.transcript += " " + text;
   session.lastHeartbeat = Date.now();
 
   const structureResults = analyzeStructure(session.transcript);
@@ -95,7 +96,7 @@ export async function processTranscriptChunk(
   session.metrics = computeMetrics(session.transcript, durationSeconds, structureCount);
 
   localSessions.set(sessionId, session);
-  await patchSessionTranscript(sessionId, (isFinal ? " " : "") + text, session.sequence);
+  await patchSessionTranscript(sessionId, " " + text, session.sequence);
   await setSessionState(sessionId, session);
 
   const fillers = detectFillerWords(text);

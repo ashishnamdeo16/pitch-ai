@@ -9,6 +9,11 @@ interface UseSpeechRecognitionOptions {
   enabled?: boolean;
 }
 
+export function hasWebSpeech(): boolean {
+  if (typeof window === "undefined") return false;
+  return "SpeechRecognition" in window || "webkitSpeechRecognition" in window;
+}
+
 /**
  * Web Speech API streaming STT with interim results.
  */
@@ -31,15 +36,12 @@ export function useSpeechRecognition({
   useEffect(() => {
     if (!enabled) return;
 
-    const SR =
-      typeof window !== "undefined"
-        ? window.SpeechRecognition || window.webkitSpeechRecognition
-        : null;
-    if (!SR) {
+    if (!hasWebSpeech()) {
       setIsSupported(false);
       return;
     }
 
+    const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
     const recognition = new SR();
     recognition.continuous = true;
     recognition.interimResults = true;
@@ -53,15 +55,32 @@ export function useSpeechRecognition({
         if (event.results[i].isFinal) final += t;
         else interim += t;
       }
-      if (interim) onResultRef.current(interim, false);
-      if (final) onResultRef.current(final, true);
+      if (interim) onResultRef.current(interim.trim(), false);
+      if (final) {
+        const text = final.trim();
+        if (text) onResultRef.current(text, true);
+      }
     };
 
     recognition.onerror = (e: SpeechRecognitionErrorEvent) => {
-      onErrorRef.current?.(e.error);
-      if (e.error !== "no-speech") {
+      if (e.error === "no-speech") return;
+
+      if (e.error === "not-allowed") {
+        onErrorRef.current?.("Microphone permission denied");
         isListeningRef.current = false;
         setIsListening(false);
+        return;
+      }
+
+      if (isListeningRef.current) {
+        setTimeout(() => {
+          if (!isListeningRef.current || !recognitionRef.current) return;
+          try {
+            recognitionRef.current.start();
+          } catch {
+            /* already started */
+          }
+        }, 500);
       }
     };
 
