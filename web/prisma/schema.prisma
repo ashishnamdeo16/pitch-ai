@@ -1,0 +1,203 @@
+// PitchPilot AI — production Prisma schema
+// PostgreSQL via Supabase or any hosted Postgres
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider  = "postgresql"
+  url       = env("DATABASE_URL")
+  directUrl = env("DIRECT_URL")
+}
+
+enum SubscriptionTier {
+  FREE
+  PRO
+  TEAM
+  ENTERPRISE
+}
+
+enum SessionStatus {
+  ACTIVE
+  PAUSED
+  COMPLETED
+  ARCHIVED
+}
+
+enum InvestorPersonality {
+  AGGRESSIVE_VC
+  TECHNICAL
+  FRIENDLY_ANGEL
+  SKEPTICAL_PARTNER
+  SHARK_TANK
+}
+
+model User {
+  id               String           @id @default(cuid())
+  supabaseId       String           @unique
+  email            String           @unique
+  name             String?
+  avatarUrl        String?
+  company          String?
+  role             String?          @default("founder")
+  subscriptionTier SubscriptionTier @default(FREE)
+  stripeCustomerId String?
+  createdAt        DateTime         @default(now())
+  updatedAt        DateTime         @updatedAt
+
+  pitchSessions PitchSession[]
+  reports       Report[]
+  teamRooms     TeamRoomMember[]
+
+  @@index([supabaseId])
+  @@index([email])
+}
+
+model SubscriptionPlan {
+  id            String           @id @default(cuid())
+  tier          SubscriptionTier @unique
+  name          String
+  priceMonthly  Int
+  priceYearly   Int
+  sessionLimit  Int
+  features      String[]
+  stripePriceId String?
+  createdAt     DateTime         @default(now())
+  updatedAt     DateTime         @updatedAt
+}
+
+model PitchSession {
+  id              String        @id @default(cuid())
+  userId          String
+  title           String        @default("Practice Session")
+  status          SessionStatus @default(ACTIVE)
+  mode            String        @default("practice") // practice | investor | demo_day | shark_tank
+  language        String        @default("en")
+  durationSeconds Int           @default(0)
+  overallScore    Float?
+  confidenceScore Float?
+  energyScore     Float?
+  clarityScore    Float?
+  pacingWpm       Float?
+  fillerCount     Int           @default(0)
+  structureScore  Float?
+  recordingUrl    String?
+  shareToken      String?       @unique
+  isPublic        Boolean       @default(false)
+  startedAt       DateTime      @default(now())
+  endedAt         DateTime?
+  createdAt       DateTime      @default(now())
+  updatedAt       DateTime      @updatedAt
+
+  user              User               @relation(fields: [userId], references: [id], onDelete: Cascade)
+  transcriptChunks  TranscriptChunk[]
+  analyses          AIAnalysis[]
+  investorQuestions InvestorQuestion[]
+  structureTags     StructureTag[]
+  report            Report?
+
+  @@index([userId, createdAt])
+  @@index([shareToken])
+}
+
+model TranscriptChunk {
+  id          String   @id @default(cuid())
+  sessionId   String
+  sequence    Int
+  text        String
+  isFinal     Boolean  @default(false)
+  confidence  Float?
+  startMs     Int?
+  endMs       Int?
+  fillerWords String[] @default([])
+  createdAt   DateTime @default(now())
+
+  session PitchSession @relation(fields: [sessionId], references: [id], onDelete: Cascade)
+
+  @@unique([sessionId, sequence])
+  @@index([sessionId, sequence])
+}
+
+model AIAnalysis {
+  id          String   @id @default(cuid())
+  sessionId   String
+  type        String // feedback | structure | tone | improvement
+  content     String
+  score       Float?
+  metadata    Json?
+  tokenCount  Int?
+  cached      Boolean  @default(false)
+  createdAt   DateTime @default(now())
+
+  session PitchSession @relation(fields: [sessionId], references: [id], onDelete: Cascade)
+
+  @@index([sessionId, createdAt])
+}
+
+model InvestorQuestion {
+  id          String              @id @default(cuid())
+  sessionId   String
+  personality InvestorPersonality @default(SKEPTICAL_PARTNER)
+  question    String
+  followUp    String?
+  answer      String?
+  askedAt     DateTime            @default(now())
+  answeredAt  DateTime?
+
+  session PitchSession @relation(fields: [sessionId], references: [id], onDelete: Cascade)
+
+  @@index([sessionId])
+}
+
+model StructureTag {
+  id        String   @id @default(cuid())
+  sessionId String
+  element   String // problem | market | solution | gtm | business_model | competition | ask | vision
+  detected  Boolean  @default(false)
+  excerpt   String?
+  confidence Float?
+  createdAt DateTime @default(now())
+
+  session PitchSession @relation(fields: [sessionId], references: [id], onDelete: Cascade)
+
+  @@unique([sessionId, element])
+}
+
+model Report {
+  id          String   @id @default(cuid())
+  sessionId   String   @unique
+  userId      String
+  title       String
+  pdfUrl      String?
+  summary     String?
+  metrics     Json?
+  generatedAt DateTime @default(now())
+
+  session PitchSession @relation(fields: [sessionId], references: [id], onDelete: Cascade)
+  user    User           @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+}
+
+model TeamRoom {
+  id        String   @id @default(cuid())
+  name      String
+  inviteCode String  @unique @default(cuid())
+  createdAt DateTime @default(now())
+
+  members TeamRoomMember[]
+}
+
+model TeamRoomMember {
+  id       String   @id @default(cuid())
+  roomId   String
+  userId   String
+  role     String   @default("member")
+  joinedAt DateTime @default(now())
+
+  room TeamRoom @relation(fields: [roomId], references: [id], onDelete: Cascade)
+  user User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([roomId, userId])
+}

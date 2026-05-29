@@ -1,0 +1,97 @@
+"use client";
+
+import Link from "next/link";
+import { useState } from "react";
+import { useRouter } from "next/navigation";
+import { Zap } from "lucide-react";
+import { createClient } from "@/lib/supabase/client";
+import { Button } from "@/components/ui/button";
+import { GlassCard } from "@/components/ui/glass-card";
+import { MeshBackground } from "@/components/ui/mesh-background";
+
+export default function SignupPage() {
+  const [name, setName] = useState("");
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState("");
+  const router = useRouter();
+  const supabase = createClient();
+
+  async function handleSignup(e: React.FormEvent) {
+    e.preventDefault();
+    setLoading(true);
+    setError("");
+
+    const { error } = await supabase.auth.signUp({
+      email,
+      password,
+      options: { data: { full_name: name } },
+    });
+
+    if (error) {
+      setError(error.message);
+      setLoading(false);
+      return;
+    }
+    router.push("/dashboard");
+    router.refresh();
+  }
+
+  return (
+    <main className="relative flex min-h-screen items-center justify-center px-6">
+      <MeshBackground />
+      <GlassCard className="w-full max-w-md">
+        <div className="mb-8 flex items-center justify-center gap-2">
+          <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-gradient-to-br from-violet-600 to-indigo-600">
+            <Zap className="h-5 w-5 text-white" />
+          </div>
+          <span className="text-xl font-semibold text-white">PitchPilot AI</span>
+        </div>
+        <h1 className="text-center text-2xl font-bold text-white">
+          Start practicing free
+        </h1>
+        <p className="mt-2 text-center text-sm text-zinc-500">
+          5 sessions/month on the free plan
+        </p>
+        <form onSubmit={handleSignup} className="mt-8 space-y-4">
+          <input
+            type="text"
+            placeholder="Full name"
+            value={name}
+            onChange={(e) => setName(e.target.value)}
+            required
+            className="w-full rounded-xl border border-white/10 bg-white/5 px-4 py-3 text-sm text-white placeholder:text-zinc-600 focus:border-violet-500/50 focus:outline-none"
+          />
+          <input
+            type="email"
+            placeholder="Email"
+            value={email}
+            onChange={(e) => setEmail(e.target.value)}
+            required
+            className="w-full rounded-xl border border-white/10 bg-white/5 px-4 py-3 text-sm text-white placeholder:text-zinc-600 focus:border-violet-500/50 focus:outline-none"
+          />
+          <input
+            type="password"
+            placeholder="Password (min 6 chars)"
+            value={password}
+            onChange={(e) => setPassword(e.target.value)}
+            required
+            minLength={6}
+            className="w-full rounded-xl border border-white/10 bg-white/5 px-4 py-3 text-sm text-white placeholder:text-zinc-600 focus:border-violet-500/50 focus:outline-none"
+          />
+          {error && <p className="text-sm text-red-400">{error}</p>}
+          <Button type="submit" className="w-full" disabled={loading}>
+            {loading ? "Creating account…" : "Create account"}
+          </Button>
+        </form>
+        <p className="mt-6 text-center text-sm text-zinc-500">
+          Already have an account?{" "}
+          <Link href="/login" className="text-violet-400 hover:underline">
+            Sign in
+          </Link>
+        </p>
+      </GlassCard>
+    </main>
+  );
+}
