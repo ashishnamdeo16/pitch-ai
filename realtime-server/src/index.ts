@@ -1,5 +1,5 @@
 import "dotenv/config";
-import express from "express";
+import express, { type Request, type Response } from "express";
 import { createServer } from "http";
 import { Server, type Socket } from "socket.io";
 import cors from "cors";
@@ -31,7 +31,7 @@ const VALID_PERSONALITIES: InvestorPersonality[] = [
 ];
 
 const app = express();
-app.get("/health", (_req, res) => {
+app.get("/health", (_req: Request, res: Response) => {
   res.json({
     status: "ok",
     service: "pitchpilot-realtime",
