@@ -1,0 +1,16 @@
+# Free deploy for realtime WebSocket server — https://render.com
+# Dashboard → New → Blueprint → connect this repo
+services:
+  - type: web
+    name: pitchpilot-realtime
+    runtime: node
+    plan: free
+    rootDir: realtime-server
+    buildCommand: npm install && npm run build
+    startCommand: npm start
+    healthCheckPath: /health
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: WS_HEARTBEAT_MS
+        value: 25000
