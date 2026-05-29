@@ -1,5 +1,6 @@
 import Groq from "groq-sdk";
 import { NextRequest, NextResponse } from "next/server";
+import { correctPitchStt } from "@/lib/stt-corrections";
 
 export async function POST(req: NextRequest) {
   try {
@@ -25,9 +26,13 @@ export async function POST(req: NextRequest) {
       model: "whisper-large-v3-turbo",
       language: "en",
       response_format: "json",
+      prompt:
+        "Startup pitch coaching. Vocabulary: pitch, pitch deck, elevator pitch, investor, VC, traction, GTM, MVP, market, solution, founder.",
     });
 
-    return NextResponse.json({ text: transcription.text ?? "" });
+    return NextResponse.json({
+      text: correctPitchStt(transcription.text ?? ""),
+    });
   } catch {
     return NextResponse.json({ error: "Transcription failed" }, { status: 500 });
   }

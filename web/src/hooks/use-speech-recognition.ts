@@ -1,6 +1,7 @@
 "use client";
 
 import { useCallback, useEffect, useRef, useState } from "react";
+import { correctPitchStt } from "@/lib/stt-corrections";
 
 interface UseSpeechRecognitionOptions {
   onResult: (text: string, isFinal: boolean) => void;
@@ -52,13 +53,13 @@ export function useSpeechRecognition({
       let interim = "";
       let final = "";
       for (let i = event.resultIndex; i < event.results.length; i++) {
-        const t = event.results[i][0].transcript;
+        const t = correctPitchStt(event.results[i][0].transcript);
         if (event.results[i].isFinal) final += t;
         else interim += t;
       }
       if (interim) onResultRef.current(interim.trim(), false);
       if (final) {
-        const text = final.trim();
+        const text = correctPitchStt(final.trim());
         if (text && text !== lastFinalRef.current) {
           lastFinalRef.current = text;
           onResultRef.current(text, true);

@@ -5,6 +5,7 @@ import {
   getSession,
 } from "./session-manager.js";
 import { highlightFillersInText } from "./lib/analysis.js";
+import { correctPitchStt } from "./lib/stt-corrections.js";
 
 /** Broadcast transcript analysis to all clients in a session room */
 export async function pipelineTranscript(
@@ -56,7 +57,7 @@ export async function pipelineInterimTranscript(
   const session = await getSession(sessionId);
   if (!session) return;
 
-  const preview = [session.transcript.trim(), interimText.trim()]
+  const preview = [session.transcript.trim(), correctPitchStt(interimText).trim()]
     .filter(Boolean)
     .join(" ");
 

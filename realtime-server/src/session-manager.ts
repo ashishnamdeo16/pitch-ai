@@ -8,6 +8,7 @@ import {
 import { streamPitchFeedback, generateInvestorQuestion } from "./lib/llm.js";
 import { getSessionState, setSessionState, deleteSessionState } from "./lib/redis.js";
 import { mergeTranscriptSegment } from "./lib/transcript-merge.js";
+import { correctPitchStt } from "./lib/stt-corrections.js";
 import type {
   AIFeedbackChunk,
   InvestorPersonality,
@@ -84,7 +85,8 @@ export async function processTranscriptChunk(
   if (expectedUserId && session.userId !== expectedUserId) return null;
   if (!isFinal) return null;
 
-  const { text: merged, appended } = mergeTranscriptSegment(session.transcript, text);
+  const cleaned = correctPitchStt(text);
+  const { text: merged, appended } = mergeTranscriptSegment(session.transcript, cleaned);
   if (!appended) return null;
 
   session.sequence += 1;
