@@ -27,6 +27,7 @@ export function useSpeechRecognition({
   const [isSupported, setIsSupported] = useState(true);
   const recognitionRef = useRef<SpeechRecognition | null>(null);
   const isListeningRef = useRef(false);
+  const lastFinalRef = useRef("");
   const onResultRef = useRef(onResult);
   const onErrorRef = useRef(onError);
 
@@ -58,7 +59,10 @@ export function useSpeechRecognition({
       if (interim) onResultRef.current(interim.trim(), false);
       if (final) {
         const text = final.trim();
-        if (text) onResultRef.current(text, true);
+        if (text && text !== lastFinalRef.current) {
+          lastFinalRef.current = text;
+          onResultRef.current(text, true);
+        }
       }
     };
 
@@ -111,6 +115,7 @@ export function useSpeechRecognition({
     }
     try {
       await navigator.mediaDevices.getUserMedia({ audio: true });
+      lastFinalRef.current = "";
       isListeningRef.current = true;
       recognitionRef.current.start();
       setIsListening(true);

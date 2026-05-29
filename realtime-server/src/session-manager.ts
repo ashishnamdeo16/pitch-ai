@@ -6,7 +6,8 @@ import {
   highlightFillersInText,
 } from "./lib/analysis.js";
 import { streamPitchFeedback, generateInvestorQuestion } from "./lib/llm.js";
-import { getSessionState, setSessionState, patchSessionTranscript, deleteSessionState } from "./lib/redis.js";
+import { getSessionState, setSessionState, deleteSessionState } from "./lib/redis.js";
+import { mergeTranscriptSegment } from "./lib/transcript-merge.js";
 import type {
   AIFeedbackChunk,
   InvestorPersonality,
@@ -83,8 +84,11 @@ export async function processTranscriptChunk(
   if (expectedUserId && session.userId !== expectedUserId) return null;
   if (!isFinal) return null;
 
+  const { text: merged, appended } = mergeTranscriptSegment(session.transcript, text);
+  if (!appended) return null;
+
   session.sequence += 1;
-  session.transcript += " " + text;
+  session.transcript = merged;
   session.lastHeartbeat = Date.now();
 
   const structureResults = analyzeStructure(session.transcript);
@@ -96,7 +100,6 @@ export async function processTranscriptChunk(
   session.metrics = computeMetrics(session.transcript, durationSeconds, structureCount);
 
   localSessions.set(sessionId, session);
-  await patchSessionTranscript(sessionId, " " + text, session.sequence);
   await setSessionState(sessionId, session);
 
   const fillers = detectFillerWords(text);

@@ -49,6 +49,7 @@ export function PracticeSession({ userId }: { userId: string }) {
     isRecording,
     isPaused,
     transcript,
+    interimText,
     metrics,
     structure,
     feedback,
@@ -63,16 +64,26 @@ export function PracticeSession({ userId }: { userId: string }) {
     tickDuration,
     setMirrorMode,
     setCountdown,
+    setInterimText,
   } = useSessionStore();
 
   const { sendTranscript, endSession, pauseSession } = usePitchSocket(userId);
 
   const onSpeechResult = useCallback(
     (text: string, isFinal: boolean) => {
-      sendTranscript(text, isFinal);
+      if (isFinal) {
+        setInterimText("");
+        sendTranscript(text, true);
+      } else {
+        setInterimText(text);
+      }
     },
-    [sendTranscript]
+    [sendTranscript, setInterimText]
   );
+
+  const liveTranscript = [transcript.trim(), interimText.trim()]
+    .filter(Boolean)
+    .join(" ");
 
   const { isListening, isSupported, start, stop, provider } = useTranscription({
     onResult: onSpeechResult,
@@ -338,7 +349,7 @@ export function PracticeSession({ userId }: { userId: string }) {
 
           <GlassCard>
             <h3 className="mb-3 text-sm font-medium text-zinc-400">Live transcript</h3>
-            <LiveTranscript text={transcript} />
+            <LiveTranscript text={liveTranscript} />
           </GlassCard>
 
           <GlassCard>

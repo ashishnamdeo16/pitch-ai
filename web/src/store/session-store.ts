@@ -13,6 +13,7 @@ interface SessionState {
   isRecording: boolean;
   isPaused: boolean;
   transcript: string;
+  interimText: string;
   metrics: SessionMetrics;
   structure: StructureItem[];
   feedback: AIFeedbackItem[];
@@ -30,6 +31,7 @@ interface SessionState {
   setRecording: (v: boolean) => void;
   setPaused: (v: boolean) => void;
   setTranscript: (t: string) => void;
+  setInterimText: (t: string) => void;
   setMetrics: (m: Partial<SessionMetrics>) => void;
   setStructure: (s: StructureItem[]) => void;
   addFeedback: (f: AIFeedbackItem) => void;
@@ -61,6 +63,7 @@ export const useSessionStore = create<SessionState>((set, get) => ({
   isRecording: false,
   isPaused: false,
   transcript: "",
+  interimText: "",
   metrics: defaultMetrics,
   structure: [],
   feedback: [],
@@ -77,7 +80,8 @@ export const useSessionStore = create<SessionState>((set, get) => ({
   setSessionReady: (v) => set({ isSessionReady: v }),
   setRecording: (v) => set({ isRecording: v }),
   setPaused: (v) => set({ isPaused: v }),
-  setTranscript: (t) => set({ transcript: t }),
+  setTranscript: (t) => set({ transcript: t, interimText: "" }),
+  setInterimText: (t) => set({ interimText: t }),
   setMetrics: (m) => set({ metrics: { ...get().metrics, ...m } }),
   setStructure: (s) => set({ structure: s }),
   addFeedback: (f) =>
@@ -116,6 +120,7 @@ export const useSessionStore = create<SessionState>((set, get) => ({
       isRecording: false,
       isPaused: false,
       transcript: "",
+      interimText: "",
       metrics: defaultMetrics,
       structure: [],
       feedback: [],

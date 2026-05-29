@@ -176,10 +176,12 @@ export function usePitchSocket(userId: string) {
     ]
   );
 
-  const sendTranscript = useCallback((text: string, isFinal = false) => {
-    if (!useSessionStore.getState().isSessionReady) return;
-    const wordCount = text.trim().split(/\s+/).filter(Boolean).length;
-    socketRef.current?.emit("transcript:chunk", { text, isFinal, wordCount });
+  const sendTranscript = useCallback((text: string, isFinal = true) => {
+    if (!useSessionStore.getState().isSessionReady || !isFinal) return;
+    const trimmed = text.trim();
+    if (!trimmed) return;
+    const wordCount = trimmed.split(/\s+/).filter(Boolean).length;
+    socketRef.current?.emit("transcript:chunk", { text: trimmed, isFinal: true, wordCount });
   }, []);
 
   const askInvestor = useCallback((personality: string) => {
