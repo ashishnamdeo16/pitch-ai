@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import { createClient } from "@/lib/supabase/server";
 import { prisma } from "@/lib/prisma";
 import { rateLimit } from "@/lib/redis";
+import { API_USER_ERRORS } from "@/lib/user-messages";
 
 const ALLOWED_PATCH_FIELDS = [
   "title",
@@ -32,12 +33,12 @@ export async function GET(
     } = await supabase.auth.getUser();
 
     if (!user) {
-      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+      return NextResponse.json({ error: API_USER_ERRORS.unauthorized }, { status: 401 });
     }
 
     const rl = await rateLimit(`session:get:${user.id}`, 60, 60);
     if (!rl.success) {
-      return NextResponse.json({ error: "Rate limited" }, { status: 429 });
+      return NextResponse.json({ error: API_USER_ERRORS.rateLimited }, { status: 429 });
     }
 
     const dbUser = await prisma.user.findUnique({
@@ -45,7 +46,7 @@ export async function GET(
     });
 
     if (!dbUser) {
-      return NextResponse.json({ error: "Not found" }, { status: 404 });
+      return NextResponse.json({ error: API_USER_ERRORS.notFound }, { status: 404 });
     }
 
     const session = await prisma.pitchSession.findFirst({
@@ -59,7 +60,7 @@ export async function GET(
     });
 
     if (!session) {
-      return NextResponse.json({ error: "Not found" }, { status: 404 });
+      return NextResponse.json({ error: API_USER_ERRORS.notFound }, { status: 404 });
     }
 
     return NextResponse.json({ session });
@@ -81,12 +82,12 @@ export async function PATCH(
     } = await supabase.auth.getUser();
 
     if (!user) {
-      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+      return NextResponse.json({ error: API_USER_ERRORS.unauthorized }, { status: 401 });
     }
 
     const rl = await rateLimit(`session:patch:${user.id}`, 30, 60);
     if (!rl.success) {
-      return NextResponse.json({ error: "Rate limited" }, { status: 429 });
+      return NextResponse.json({ error: API_USER_ERRORS.rateLimited }, { status: 429 });
     }
 
     const dbUser = await prisma.user.findUnique({
@@ -94,7 +95,7 @@ export async function PATCH(
     });
 
     if (!dbUser) {
-      return NextResponse.json({ error: "Not found" }, { status: 404 });
+      return NextResponse.json({ error: API_USER_ERRORS.notFound }, { status: 404 });
     }
 
     const body = await request.json();
@@ -112,14 +113,14 @@ export async function PATCH(
       data.status &&
       !VALID_STATUSES.includes(data.status as (typeof VALID_STATUSES)[number])
     ) {
-      return NextResponse.json({ error: "Invalid status" }, { status: 400 });
+      return NextResponse.json({ error: API_USER_ERRORS.invalidStatus }, { status: 400 });
     }
 
     if (
       data.mode &&
       !VALID_MODES.includes(data.mode as (typeof VALID_MODES)[number])
     ) {
-      return NextResponse.json({ error: "Invalid mode" }, { status: 400 });
+      return NextResponse.json({ error: API_USER_ERRORS.invalidMode }, { status: 400 });
     }
 
     if (data.status === "COMPLETED") {
@@ -150,12 +151,12 @@ export async function DELETE(
     } = await supabase.auth.getUser();
 
     if (!user) {
-      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+      return NextResponse.json({ error: API_USER_ERRORS.unauthorized }, { status: 401 });
     }
 
     const rl = await rateLimit(`session:delete:${user.id}`, 20, 60);
     if (!rl.success) {
-      return NextResponse.json({ error: "Rate limited" }, { status: 429 });
+      return NextResponse.json({ error: API_USER_ERRORS.rateLimited }, { status: 429 });
     }
 
     const dbUser = await prisma.user.findUnique({
@@ -163,7 +164,7 @@ export async function DELETE(
     });
 
     if (!dbUser) {
-      return NextResponse.json({ error: "Not found" }, { status: 404 });
+      return NextResponse.json({ error: API_USER_ERRORS.notFound }, { status: 404 });
     }
 
     const deleted = await prisma.pitchSession.deleteMany({
@@ -171,7 +172,7 @@ export async function DELETE(
     });
 
     if (deleted.count === 0) {
-      return NextResponse.json({ error: "Not found" }, { status: 404 });
+      return NextResponse.json({ error: API_USER_ERRORS.notFound }, { status: 404 });
     }
 
     return NextResponse.json({ success: true });

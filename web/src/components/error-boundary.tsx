@@ -2,6 +2,7 @@
 
 import { Component, type ReactNode } from "react";
 import { Button } from "@/components/ui/button";
+import { USER_MESSAGES } from "@/lib/user-messages";
 
 interface Props {
   children: ReactNode;
@@ -27,7 +28,7 @@ export class ErrorBoundary extends Component<Props, State> {
       return (
         this.props.fallback ?? (
           <div className="flex min-h-[200px] flex-col items-center justify-center gap-4 p-4 sm:p-8">
-            <p className="text-zinc-400">Something went wrong.</p>
+            <p className="text-zinc-400">{USER_MESSAGES.boundary}</p>
             <Button onClick={() => this.setState({ hasError: false })}>
               Try again
             </Button>

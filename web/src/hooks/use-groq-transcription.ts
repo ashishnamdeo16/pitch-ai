@@ -1,6 +1,7 @@
 "use client";
 
 import { useCallback, useRef, useState } from "react";
+import { mapSpeechError, parseApiError } from "@/lib/user-messages";
 
 interface UseGroqTranscriptionOptions {
   onResult: (text: string, isFinal: boolean) => void;
@@ -54,14 +55,14 @@ export function useGroqTranscription({
         formData.append("audio", blob, "audio.webm");
         const res = await fetch("/api/transcribe", { method: "POST", body: formData });
         if (!res.ok) {
-          onError?.("Transcription failed");
+          onError?.(await parseApiError(res));
           return;
         }
         const data = (await res.json()) as { text?: string };
         const text = data.text?.trim();
         if (text) onResult(text, true);
       } catch {
-        onError?.("Transcription failed");
+        onError?.(mapSpeechError("Transcription failed"));
       }
     },
     [onError, onResult]
@@ -93,7 +94,7 @@ export function useGroqTranscription({
     };
 
     recorder.onerror = () => {
-      onError?.("Audio recording error");
+      onError?.(mapSpeechError("Audio recording error"));
       stop();
     };
 
@@ -123,7 +124,7 @@ export function useGroqTranscription({
       setIsListening(true);
       startNextChunk();
     } catch {
-      onError?.("Microphone permission denied");
+      onError?.(mapSpeechError("not-allowed"));
     }
   }, [enabled, onError, startNextChunk]);
 

@@ -14,6 +14,7 @@ import {
 } from "recharts";
 import { GlassCard } from "@/components/ui/glass-card";
 import { TrendingUp, Target, Mic } from "lucide-react";
+import { logDevError, parseApiError } from "@/lib/user-messages";
 
 interface AnalyticsData {
   scoreHistory: { session: number; score: number | null; date: string }[];
@@ -26,12 +27,24 @@ interface AnalyticsData {
 export function AnalyticsCharts() {
   const [data, setData] = useState<AnalyticsData | null>(null);
   const [loading, setLoading] = useState(true);
+  const [loadError, setLoadError] = useState<string | null>(null);
 
   useEffect(() => {
     fetch("/api/analytics")
-      .then((r) => r.json())
-      .then(setData)
-      .catch(console.error)
+      .then(async (r) => {
+        if (!r.ok) {
+          setLoadError(await parseApiError(r));
+          return null;
+        }
+        return r.json();
+      })
+      .then((json) => {
+        if (json) setData(json);
+      })
+      .catch((e) => {
+        logDevError("analytics/load", e);
+        setLoadError("Unable to load analytics. Please refresh the page.");
+      })
       .finally(() => setLoading(false));
   }, []);
 
@@ -43,6 +56,12 @@ export function AnalyticsCharts() {
     <div className="page-shell max-w-full">
       <h1 className="text-xl font-bold text-white sm:text-2xl">Analytics</h1>
       <p className="mt-1 text-zinc-500">Track your pitch improvement over time</p>
+
+      {loadError && (
+        <p className="mt-4 text-sm text-red-400" role="alert">
+          {loadError}
+        </p>
+      )}
 
       <div className="mt-6 grid grid-cols-1 gap-4 sm:mt-8 sm:grid-cols-2 md:grid-cols-3">
         {[
@@ -80,7 +99,7 @@ export function AnalyticsCharts() {
 
       {loading ? (
         <GlassCard className="mt-8 p-12 text-center text-zinc-500">
-          Loading analytics…
+          Loading your pitch analytics…
         </GlassCard>
       ) : !hasSessions ? (
         <GlassCard className="mt-8 p-12 text-center">

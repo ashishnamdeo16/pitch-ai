@@ -1,12 +1,16 @@
 import Groq from "groq-sdk";
 import { NextRequest, NextResponse } from "next/server";
 import { correctPitchStt } from "@/lib/stt-corrections";
+import { API_USER_ERRORS } from "@/lib/user-messages";
 
 export async function POST(req: NextRequest) {
   try {
     const apiKey = process.env.GROQ_API_KEY;
     if (!apiKey) {
-      return NextResponse.json({ error: "Transcription failed" }, { status: 500 });
+      return NextResponse.json(
+        { error: API_USER_ERRORS.transcriptionFailed },
+        { status: 500 }
+      );
     }
 
     const groq = new Groq({ apiKey });
@@ -14,7 +18,7 @@ export async function POST(req: NextRequest) {
     const audio = formData.get("audio");
 
     if (!audio || !(audio instanceof Blob) || audio.size === 0) {
-      return NextResponse.json({ error: "No audio file" }, { status: 400 });
+      return NextResponse.json({ error: API_USER_ERRORS.noAudio }, { status: 400 });
     }
 
     const file = new File([audio], "audio.webm", {
@@ -34,6 +38,9 @@ export async function POST(req: NextRequest) {
       text: correctPitchStt(transcription.text ?? ""),
     });
   } catch {
-    return NextResponse.json({ error: "Transcription failed" }, { status: 500 });
+    return NextResponse.json(
+      { error: API_USER_ERRORS.transcriptionFailed },
+      { status: 500 }
+    );
   }
 }

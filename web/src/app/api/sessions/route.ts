@@ -3,6 +3,7 @@ import { createClient } from "@/lib/supabase/server";
 import { prisma } from "@/lib/prisma";
 import { rateLimit } from "@/lib/redis";
 import { nextSessionTitle } from "@/lib/session-title";
+import { API_USER_ERRORS } from "@/lib/user-messages";
 
 const VALID_MODES = ["practice", "investor", "demo_day", "shark_tank"] as const;
 
@@ -14,12 +15,12 @@ export async function GET() {
     } = await supabase.auth.getUser();
 
     if (!user) {
-      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+      return NextResponse.json({ error: API_USER_ERRORS.unauthorized }, { status: 401 });
     }
 
     const rl = await rateLimit(`sessions:get:${user.id}`, 60, 60);
     if (!rl.success) {
-      return NextResponse.json({ error: "Rate limited" }, { status: 429 });
+      return NextResponse.json({ error: API_USER_ERRORS.rateLimited }, { status: 429 });
     }
 
     const dbUser = await prisma.user.findUnique({
@@ -49,7 +50,7 @@ export async function GET() {
     return NextResponse.json({ sessions });
   } catch (e) {
     console.error(e);
-    return NextResponse.json({ error: "Server error" }, { status: 500 });
+    return NextResponse.json({ error: API_USER_ERRORS.server }, { status: 500 });
   }
 }
 
@@ -61,12 +62,12 @@ export async function POST(request: Request) {
     } = await supabase.auth.getUser();
 
     if (!user) {
-      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+      return NextResponse.json({ error: API_USER_ERRORS.unauthorized }, { status: 401 });
     }
 
     const rl = await rateLimit(`sessions:${user.id}`, 30, 60);
     if (!rl.success) {
-      return NextResponse.json({ error: "Rate limited" }, { status: 429 });
+      return NextResponse.json({ error: API_USER_ERRORS.rateLimited }, { status: 429 });
     }
 
     const body = await request.json();
@@ -104,6 +105,6 @@ export async function POST(request: Request) {
     return NextResponse.json({ session });
   } catch (e) {
     console.error(e);
-    return NextResponse.json({ error: "Server error" }, { status: 500 });
+    return NextResponse.json({ error: API_USER_ERRORS.server }, { status: 500 });
   }
 }

@@ -2,6 +2,7 @@
 
 import { useCallback, useEffect, useRef, useState } from "react";
 import { correctPitchStt } from "@/lib/stt-corrections";
+import { mapSpeechError } from "@/lib/user-messages";
 
 interface UseSpeechRecognitionOptions {
   onResult: (text: string, isFinal: boolean) => void;
@@ -71,7 +72,7 @@ export function useSpeechRecognition({
       if (e.error === "no-speech") return;
 
       if (e.error === "not-allowed") {
-        onErrorRef.current?.("Microphone permission denied");
+        onErrorRef.current?.(mapSpeechError("not-allowed"));
         isListeningRef.current = false;
         setIsListening(false);
         return;
@@ -111,7 +112,7 @@ export function useSpeechRecognition({
   const start = useCallback(async () => {
     if (!enabled) return;
     if (!recognitionRef.current) {
-      onErrorRef.current?.("Speech recognition not supported");
+      onErrorRef.current?.(mapSpeechError("Speech recognition not supported"));
       return;
     }
     try {
@@ -121,7 +122,7 @@ export function useSpeechRecognition({
       recognitionRef.current.start();
       setIsListening(true);
     } catch {
-      onErrorRef.current?.("Microphone permission denied");
+      onErrorRef.current?.(mapSpeechError("not-allowed"));
     }
   }, [enabled]);
 

@@ -3,6 +3,7 @@ import { createClient } from "@/lib/supabase/server";
 import { prisma } from "@/lib/prisma";
 import { PITCH_ELEMENTS } from "@/lib/constants";
 import { rateLimit } from "@/lib/redis";
+import { API_USER_ERRORS } from "@/lib/user-messages";
 
 const VALID_MODES = ["practice", "investor", "demo_day", "shark_tank"] as const;
 
@@ -34,7 +35,7 @@ export async function POST(
     } = await supabase.auth.getUser();
 
     if (!user) {
-      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+      return NextResponse.json({ error: API_USER_ERRORS.unauthorized }, { status: 401 });
     }
 
     const rl = await rateLimit(`finalize:${user.id}`, 20, 60);
@@ -47,7 +48,7 @@ export async function POST(
     });
 
     if (!dbUser) {
-      return NextResponse.json({ error: "Not found" }, { status: 404 });
+      return NextResponse.json({ error: API_USER_ERRORS.notFound }, { status: 404 });
     }
 
     const body = (await request.json()) as FinalizeBody;
@@ -57,7 +58,7 @@ export async function POST(
     });
 
     if (!existing) {
-      return NextResponse.json({ error: "Not found" }, { status: 404 });
+      return NextResponse.json({ error: API_USER_ERRORS.notFound }, { status: 404 });
     }
 
     const transcript = (body.transcript || "").slice(0, 50000);
@@ -129,6 +130,6 @@ export async function POST(
     return NextResponse.json({ success: true, sessionId: id });
   } catch (e) {
     console.error(e);
-    return NextResponse.json({ error: "Server error" }, { status: 500 });
+    return NextResponse.json({ error: API_USER_ERRORS.server }, { status: 500 });
   }
 }

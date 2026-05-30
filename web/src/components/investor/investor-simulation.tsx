@@ -47,7 +47,11 @@ export function InvestorSimulation({ userId }: { userId: string }) {
       let sid = sessionId;
       if (!sid) sid = await initSession();
       if (!sid) {
-        addActivity({ type: "session", message: "Could not start session" });
+        addActivity({
+          type: "session",
+          message:
+            "Unable to start an investor practice session. Please try again.",
+        });
         return;
       }
 
@@ -55,7 +59,8 @@ export function InvestorSimulation({ userId }: { userId: string }) {
       if (!ready) {
         addActivity({
           type: "ws",
-          message: "Connection timed out — refresh and retry",
+          message:
+            "Live coach connection timed out. Refresh the page and try again.",
         });
         return;
       }

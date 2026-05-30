@@ -3,6 +3,7 @@
 import { useCallback, useEffect, useRef } from "react";
 import { io, type Socket } from "socket.io-client";
 import { WS_URL } from "@/lib/constants";
+import { mapWsSocketError } from "@/lib/user-messages";
 import { useSessionStore } from "@/store/session-store";
 import type { AIFeedbackItem, SessionMetrics, StructureItem } from "@/types";
 
@@ -45,7 +46,11 @@ export function usePitchSocket(userId: string) {
       setSessionReady(false);
       const token = await fetchWsToken(sid);
       if (!token) {
-        addActivity({ type: "ws", message: "Auth failed — refresh and retry" });
+        addActivity({
+          type: "ws",
+          message:
+            "Unable to connect to the live coach. Please refresh the page and sign in again.",
+        });
         setConnected(false);
         return;
       }
@@ -102,7 +107,7 @@ export function usePitchSocket(userId: string) {
       socket.on("error", (err: { code?: string; message?: string }) => {
         addActivity({
           type: "ws",
-          message: err.message || "Connection error",
+          message: mapWsSocketError(err.code, err.message),
         });
       });
 

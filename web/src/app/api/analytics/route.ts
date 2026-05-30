@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import { createClient } from "@/lib/supabase/server";
 import { prisma } from "@/lib/prisma";
 import { rateLimit } from "@/lib/redis";
+import { API_USER_ERRORS } from "@/lib/user-messages";
 
 export async function GET() {
   try {
@@ -11,12 +12,12 @@ export async function GET() {
     } = await supabase.auth.getUser();
 
     if (!user) {
-      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+      return NextResponse.json({ error: API_USER_ERRORS.unauthorized }, { status: 401 });
     }
 
     const rl = await rateLimit(`analytics:${user.id}`, 30, 60);
     if (!rl.success) {
-      return NextResponse.json({ error: "Rate limited" }, { status: 429 });
+      return NextResponse.json({ error: API_USER_ERRORS.rateLimited }, { status: 429 });
     }
 
     const dbUser = await prisma.user.findUnique({
@@ -84,6 +85,6 @@ export async function GET() {
     });
   } catch (e) {
     console.error(e);
-    return NextResponse.json({ error: "Server error" }, { status: 500 });
+    return NextResponse.json({ error: API_USER_ERRORS.server }, { status: 500 });
   }
 }

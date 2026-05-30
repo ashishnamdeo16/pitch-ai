@@ -4,6 +4,7 @@ import { useCallback, useEffect, useState } from "react";
 import { Download, FileText, Trash2 } from "lucide-react";
 import { GlassCard } from "@/components/ui/glass-card";
 import { Button } from "@/components/ui/button";
+import { logDevError, parseApiError } from "@/lib/user-messages";
 
 interface Session {
   id: string;
@@ -17,17 +18,32 @@ export default function ReportsPage() {
   const [sessions, setSessions] = useState<Session[]>([]);
   const [loading, setLoading] = useState<string | null>(null);
   const [deleting, setDeleting] = useState<string | null>(null);
+  const [pageError, setPageError] = useState<string | null>(null);
+  const [actionError, setActionError] = useState<string | null>(null);
 
   const loadSessions = useCallback(() => {
+    setPageError(null);
     fetch("/api/sessions")
-      .then((r) => r.json())
+      .then(async (r) => {
+        if (!r.ok) {
+          setPageError(await parseApiError(r));
+          return null;
+        }
+        return r.json();
+      })
       .then((d) => {
+        if (!d) return;
         const list = (d.sessions || []) as Session[];
         setSessions(
           list.filter((s) => s.status === "COMPLETED" || s.status === "ARCHIVED")
         );
       })
-      .catch(console.error);
+      .catch((e) => {
+        logDevError("reports/load", e);
+        setPageError(
+          "Unable to load reports. Please refresh the page."
+        );
+      });
   }, []);
 
   useEffect(() => {
@@ -36,17 +52,31 @@ export default function ReportsPage() {
 
   async function exportPdf(sessionId: string) {
     setLoading(sessionId);
+    setActionError(null);
     try {
       const res = await fetch(`/api/reports/${sessionId}`, { method: "POST" });
+      if (!res.ok) {
+        setActionError(await parseApiError(res));
+        return;
+      }
       const data = await res.json();
       if (data.pdf) {
         const link = document.createElement("a");
         link.href = `data:application/pdf;base64,${data.pdf}`;
         link.download = data.filename || "pitch-report.pdf";
+        document.body.appendChild(link);
         link.click();
+        link.remove();
+      } else {
+        setActionError(
+          "Unable to download the report. Please try again in a moment."
+        );
       }
     } catch (e) {
-      console.error(e);
+      logDevError("reports/export", e);
+      setActionError(
+        "Unable to download the report. Please check your connection and try again."
+      );
     } finally {
       setLoading(null);
     }
@@ -55,22 +85,24 @@ export default function ReportsPage() {
   async function deleteReport(sessionId: string, title: string) {
     if (
       !window.confirm(
-        `Delete "${title}"? This removes the session, transcript, and report permanently.`
+        `Delete "${title}"? This permanently removes the session, transcript, and report.`
       )
     ) {
       return;
     }
 
     setDeleting(sessionId);
+    setActionError(null);
     try {
       const res = await fetch(`/api/sessions/${sessionId}`, { method: "DELETE" });
       if (!res.ok) {
-        console.warn("Delete failed");
+        setActionError(await parseApiError(res));
         return;
       }
       setSessions((prev) => prev.filter((s) => s.id !== sessionId));
     } catch (e) {
-      console.error(e);
+      logDevError("reports/delete", e);
+      setActionError("Unable to delete this report. Please try again.");
     } finally {
       setDeleting(null);
     }
@@ -81,8 +113,19 @@ export default function ReportsPage() {
       <h1 className="text-xl font-bold text-white sm:text-2xl">Reports</h1>
       <p className="mt-1 text-zinc-500">Export or delete pitch performance reports</p>
 
+      {pageError && (
+        <p className="mt-4 text-sm text-red-400" role="alert">
+          {pageError}
+        </p>
+      )}
+      {actionError && (
+        <p className="mt-4 text-sm text-red-400" role="alert">
+          {actionError}
+        </p>
+      )}
+
       <div className="mt-8 space-y-4">
-        {sessions.length === 0 ? (
+        {sessions.length === 0 && !pageError ? (
           <GlassCard>
             <p className="py-8 text-center text-zinc-500">
               Complete a practice session to generate reports
@@ -115,7 +158,7 @@ export default function ReportsPage() {
                   onClick={() => exportPdf(s.id)}
                 >
                   <Download className="h-4 w-4" />
-                  {loading === s.id ? "Generating…" : "Export PDF"}
+                  {loading === s.id ? "Generating report…" : "Export PDF"}
                 </Button>
                 <Button
                   variant="danger"

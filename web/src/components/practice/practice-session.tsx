@@ -29,6 +29,7 @@ import {
   registerCameraStream,
   stopCameraStream,
 } from "@/lib/camera-stream";
+import { logDevError, mapSpeechError } from "@/lib/user-messages";
 
 export function PracticeSession({ userId }: { userId: string }) {
   const videoRef = useRef<HTMLVideoElement>(null);
@@ -65,6 +66,7 @@ export function PracticeSession({ userId }: { userId: string }) {
     setMirrorMode,
     setCountdown,
     setInterimText,
+    addActivity,
   } = useSessionStore();
 
   const { sendTranscript, endSession, pauseSession } = usePitchSocket(userId);
@@ -87,7 +89,11 @@ export function PracticeSession({ userId }: { userId: string }) {
 
   const { isListening, isSupported, start, stop, provider } = useTranscription({
     onResult: onSpeechResult,
-    onError: (e) => console.warn("STT:", e),
+    onError: (e) => {
+      const msg = mapSpeechError(e);
+      if (msg) addActivity({ type: "ws", message: msg });
+      logDevError("STT", e);
+    },
   });
 
   const startSession = async () => {
@@ -97,7 +103,11 @@ export function PracticeSession({ userId }: { userId: string }) {
       body: JSON.stringify({ mode }),
     });
     if (!res.ok) {
-      console.warn("Failed to create session");
+      addActivity({
+        type: "session",
+        message:
+          "Unable to start a practice session. Please try again.",
+      });
       return;
     }
     const data = await res.json();

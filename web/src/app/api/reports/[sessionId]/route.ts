@@ -4,6 +4,7 @@ import { prisma } from "@/lib/prisma";
 import { generatePitchReportPDF } from "@/lib/pdf-report";
 import { rateLimit } from "@/lib/redis";
 import { sessionPdfFilename } from "@/lib/session-title";
+import { API_USER_ERRORS } from "@/lib/user-messages";
 
 export async function POST(
   _request: Request,
@@ -17,12 +18,12 @@ export async function POST(
     } = await supabase.auth.getUser();
 
     if (!user) {
-      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+      return NextResponse.json({ error: API_USER_ERRORS.unauthorized }, { status: 401 });
     }
 
     const rl = await rateLimit(`reports:${user.id}`, 10, 60);
     if (!rl.success) {
-      return NextResponse.json({ error: "Rate limited" }, { status: 429 });
+      return NextResponse.json({ error: API_USER_ERRORS.rateLimited }, { status: 429 });
     }
 
     const dbUser = await prisma.user.findUnique({
@@ -30,7 +31,7 @@ export async function POST(
     });
 
     if (!dbUser) {
-      return NextResponse.json({ error: "Not found" }, { status: 404 });
+      return NextResponse.json({ error: API_USER_ERRORS.notFound }, { status: 404 });
     }
 
     const session = await prisma.pitchSession.findFirst({
@@ -44,7 +45,7 @@ export async function POST(
     });
 
     if (!session) {
-      return NextResponse.json({ error: "Not found" }, { status: 404 });
+      return NextResponse.json({ error: API_USER_ERRORS.notFound }, { status: 404 });
     }
 
     const transcript = session.transcriptChunks.map((c) => c.text).join(" ");
@@ -90,6 +91,6 @@ export async function POST(
     });
   } catch (e) {
     console.error(e);
-    return NextResponse.json({ error: "Server error" }, { status: 500 });
+    return NextResponse.json({ error: API_USER_ERRORS.server }, { status: 500 });
   }
 }
