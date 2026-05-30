@@ -29,12 +29,12 @@ const testimonials = [
 
 export function Testimonials() {
   return (
-    <section className="px-6 py-24">
-      <div className="mx-auto max-w-6xl">
-        <h2 className="text-center text-3xl font-bold text-white">
+    <section className="px-4 py-16 sm:px-6 sm:py-24">
+      <div className="mx-auto w-full max-w-6xl">
+        <h2 className="text-center text-2xl font-bold text-white sm:text-3xl">
           Loved by founders
         </h2>
-        <div className="mt-16 grid gap-6 md:grid-cols-3">
+        <div className="mt-10 grid grid-cols-1 gap-4 sm:mt-16 sm:gap-6 md:grid-cols-3">
           {testimonials.map((t, i) => (
             <GlassCard key={t.author} hover>
               <motion.div

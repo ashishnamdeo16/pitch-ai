@@ -15,7 +15,7 @@ export function LiveTranscript({ text, className }: LiveTranscriptProps) {
   return (
     <div
       className={cn(
-        "max-h-64 overflow-y-auto rounded-xl border border-white/[0.06] bg-black/20 p-4 font-mono text-sm leading-relaxed",
+        "max-h-48 overflow-y-auto overflow-x-hidden rounded-xl border border-white/[0.06] bg-black/20 p-3 font-mono text-xs leading-relaxed break-words sm:max-h-64 sm:p-4 sm:text-sm",
         className
       )}
     >

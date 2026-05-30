@@ -33,20 +33,20 @@ const features = [
 
 export function Features() {
   return (
-    <section id="features" className="px-6 py-24">
-      <div className="mx-auto max-w-6xl">
+    <section id="features" className="px-4 py-16 sm:px-6 sm:py-24">
+      <div className="mx-auto w-full max-w-6xl">
         <motion.h2
           initial={{ opacity: 0 }}
           whileInView={{ opacity: 1 }}
           viewport={{ once: true }}
-          className="text-center text-3xl font-bold text-white md:text-4xl"
+          className="text-center text-2xl font-bold text-white sm:text-3xl md:text-4xl"
         >
           How it works
         </motion.h2>
         <p className="mx-auto mt-4 max-w-xl text-center text-zinc-500">
           Three steps to a YC-ready pitch
         </p>
-        <div className="mt-16 grid gap-6 md:grid-cols-2 lg:grid-cols-4">
+        <div className="mt-10 grid grid-cols-1 gap-4 sm:mt-16 sm:grid-cols-2 sm:gap-6 lg:grid-cols-4">
           {features.map((f, i) => (
             <GlassCard key={f.title} hover className="h-full">
               <motion.div

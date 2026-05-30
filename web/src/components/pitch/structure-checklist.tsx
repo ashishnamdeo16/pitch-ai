@@ -24,7 +24,7 @@ export function StructureChecklist({ structure }: StructureChecklistProps) {
             animate={{ opacity: 1, scale: 1 }}
             transition={{ delay: i * 0.05 }}
             className={cn(
-              "flex items-center gap-2 rounded-lg border px-3 py-2 text-xs transition-colors",
+              "flex min-h-10 min-w-0 items-center gap-2 rounded-lg border px-2 py-2 text-xs transition-colors sm:px-3",
               detected
                 ? "border-emerald-500/30 bg-emerald-500/10 text-emerald-300"
                 : "border-white/[0.06] bg-white/[0.02] text-zinc-500"
@@ -35,7 +35,7 @@ export function StructureChecklist({ structure }: StructureChecklistProps) {
             ) : (
               <Circle className="h-3.5 w-3.5 shrink-0" />
             )}
-            <span>
+            <span className="truncate">
               {el.icon} {el.label}
             </span>
           </motion.div>

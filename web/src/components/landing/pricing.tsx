@@ -10,13 +10,13 @@ import { cn } from "@/lib/utils";
 
 export function Pricing() {
   return (
-    <section id="pricing" className="px-6 py-24">
-      <div className="mx-auto max-w-5xl">
-        <h2 className="text-center text-3xl font-bold text-white">Simple pricing</h2>
+    <section id="pricing" className="px-4 py-16 sm:px-6 sm:py-24">
+      <div className="mx-auto w-full max-w-5xl">
+        <h2 className="text-center text-2xl font-bold text-white sm:text-3xl">Simple pricing</h2>
         <p className="mt-4 text-center text-zinc-500">
           Start free. Upgrade when you&apos;re fundraising.
         </p>
-        <div className="mt-16 grid gap-6 md:grid-cols-3">
+        <div className="mt-10 grid grid-cols-1 gap-4 sm:mt-16 sm:gap-6 md:grid-cols-3">
           {PRICING_PLANS.map((plan, i) => (
             <GlassCard
               key={plan.name}
@@ -39,7 +39,7 @@ export function Pricing() {
                 )}
                 <h3 className="text-lg font-semibold text-white">{plan.name}</h3>
                 <p className="mt-2">
-                  <span className="text-4xl font-bold text-white">
+                  <span className="text-3xl font-bold text-white sm:text-4xl">
                     {plan.price === 0 ? "Free" : `$${plan.price}`}
                   </span>
                   {plan.price > 0 && (

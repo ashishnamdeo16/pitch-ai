@@ -36,7 +36,7 @@ export function FeedbackTimeline({ items }: FeedbackTimelineProps) {
             animate={{ opacity: 1, x: 0 }}
             transition={{ delay: i * 0.05 }}
             className={cn(
-              "rounded-xl border p-4",
+              "rounded-xl border p-3 sm:p-4",
               item.type === "question"
                 ? "border-amber-500/20 bg-amber-500/5"
                 : "border-violet-500/20 bg-violet-500/5"
@@ -49,7 +49,7 @@ export function FeedbackTimeline({ items }: FeedbackTimelineProps) {
                 <span className="ml-auto animate-pulse text-violet-400">streaming…</span>
               )}
             </div>
-            <p className="text-sm leading-relaxed text-zinc-200">
+            <p className="break-words text-sm leading-relaxed text-zinc-200">
               {item.content || "…"}
             </p>
           </motion.div>

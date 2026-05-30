@@ -8,8 +8,8 @@ import { Waveform } from "@/components/pitch/waveform";
 
 export function Hero() {
   return (
-    <section className="relative px-6 pb-24 pt-32 md:pt-40">
-      <div className="mx-auto max-w-5xl text-center">
+    <section className="relative px-4 pb-16 pt-24 sm:px-6 sm:pb-24 sm:pt-32 md:pt-40">
+      <div className="mx-auto w-full max-w-5xl text-center">
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
@@ -23,7 +23,7 @@ export function Hero() {
           initial={{ opacity: 0, y: 24 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.1 }}
-          className="text-5xl font-bold tracking-tight text-white md:text-7xl"
+          className="text-3xl font-bold tracking-tight text-white sm:text-5xl md:text-7xl"
         >
           Nail your pitch
           <br />
@@ -36,7 +36,7 @@ export function Hero() {
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.2 }}
-          className="mx-auto mt-6 max-w-2xl text-lg text-zinc-400"
+          className="mx-auto mt-4 max-w-2xl text-base text-zinc-400 sm:mt-6 sm:text-lg"
         >
           PitchPilot AI analyzes your startup pitch in real time — filler words,
           pacing, structure, and investor-grade feedback while you speak.
@@ -46,15 +46,15 @@ export function Hero() {
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.3 }}
-          className="mt-10 flex flex-wrap items-center justify-center gap-4"
+          className="mt-8 flex w-full flex-col items-stretch justify-center gap-3 px-2 sm:mt-10 sm:flex-row sm:flex-wrap sm:items-center sm:gap-4 sm:px-0"
         >
-          <Link href="/signup">
-            <Button size="lg">
+          <Link href="/signup" className="w-full sm:w-auto">
+            <Button size="lg" className="w-full sm:w-auto">
               Start practicing free
               <ArrowRight className="h-4 w-4" />
             </Button>
           </Link>
-          <Button variant="secondary" size="lg">
+          <Button variant="secondary" size="lg" className="w-full sm:w-auto">
             <Play className="h-4 w-4" />
             Watch demo
           </Button>
@@ -64,7 +64,7 @@ export function Hero() {
           initial={{ opacity: 0, scale: 0.95 }}
           animate={{ opacity: 1, scale: 1 }}
           transition={{ delay: 0.5 }}
-          className="relative mx-auto mt-16 max-w-3xl overflow-hidden rounded-2xl border border-white/[0.08] bg-white/[0.02] p-8 backdrop-blur-xl"
+          className="relative mx-auto mt-10 w-full max-w-3xl overflow-hidden rounded-2xl border border-white/[0.08] bg-white/[0.02] p-4 backdrop-blur-xl sm:mt-16 sm:p-8"
         >
           <div className="absolute inset-0 bg-gradient-to-br from-violet-600/10 via-transparent to-indigo-600/10" />
           <div className="relative">
@@ -82,7 +82,7 @@ export function Hero() {
               </span>{" "}
               operating system for founder pitches — $2.4B TAM, 40% MoM growth…
             </p>
-            <div className="mt-4 flex gap-4">
+            <div className="mt-4 grid grid-cols-3 gap-2 sm:flex sm:gap-4">
               {[
                 { label: "Overall", value: 87 },
                 { label: "Clarity", value: 92 },
@@ -90,9 +90,9 @@ export function Hero() {
               ].map((s) => (
                 <div
                   key={s.label}
-                  className="flex-1 rounded-lg border border-white/[0.06] bg-black/20 p-3 text-center"
+                  className="min-w-0 flex-1 rounded-lg border border-white/[0.06] bg-black/20 p-2 text-center sm:p-3"
                 >
-                  <p className="text-2xl font-bold text-white">{s.value}</p>
+                  <p className="text-lg font-bold text-white sm:text-2xl">{s.value}</p>
                   <p className="text-xs text-zinc-500">{s.label}</p>
                 </div>
               ))}

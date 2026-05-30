@@ -19,10 +19,10 @@ const buttonVariants = cva(
         danger: "bg-red-500/20 text-red-300 border border-red-500/30 hover:bg-red-500/30",
       },
       size: {
-        sm: "h-9 px-4 text-sm",
-        md: "h-11 px-6 text-sm",
-        lg: "h-13 px-8 text-base",
-        icon: "h-10 w-10",
+        sm: "h-10 min-h-10 px-4 text-sm sm:h-9",
+        md: "h-11 min-h-11 px-6 text-sm",
+        lg: "h-12 min-h-12 px-6 text-base sm:px-8",
+        icon: "h-11 w-11 min-h-11 min-w-11 sm:h-10 sm:w-10",
       },
     },
     defaultVariants: {

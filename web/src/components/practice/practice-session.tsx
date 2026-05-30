@@ -225,17 +225,23 @@ export function PracticeSession({ userId }: { userId: string }) {
   });
 
   return (
-    <div className={fullscreen ? "fixed inset-0 z-50 bg-[#09090b] p-6" : "p-8"}>
-      <div className="mb-6 flex flex-wrap items-center justify-between gap-4">
-        <div>
-          <h1 className="text-2xl font-bold text-white">Practice Session</h1>
-          <p className="text-sm text-zinc-500">
+    <div
+      className={
+        fullscreen
+          ? "fixed inset-0 z-50 flex max-w-[100vw] flex-col overflow-hidden bg-[#09090b] p-4 sm:p-6"
+          : "page-shell max-w-full"
+      }
+    >
+      <div className="mb-4 flex flex-col gap-4 sm:mb-6 sm:flex-row sm:flex-wrap sm:items-center sm:justify-between">
+        <div className="min-w-0">
+          <h1 className="text-xl font-bold text-white sm:text-2xl">Practice Session</h1>
+          <p className="text-xs text-zinc-500 sm:text-sm">
             {isRecording ? formatDuration(durationSeconds) : "Press start to begin"} ·{" "}
             STT: {provider === "groq" ? "Groq Whisper" : "Web Speech"}
             {!isSupported && " · STT may be limited in this browser"}
           </p>
         </div>
-        <div className="flex flex-wrap gap-2">
+        <div className="flex w-full flex-wrap gap-2 sm:w-auto">
           <Button
             variant="secondary"
             size="sm"
@@ -281,21 +287,21 @@ export function PracticeSession({ userId }: { userId: string }) {
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
-            className="fixed inset-0 z-50 flex items-center justify-center bg-black/80"
+            className="fixed inset-0 z-50 flex items-center justify-center bg-black/80 p-4"
           >
-            <span className="text-8xl font-bold text-white">{countdown}</span>
+            <span className="text-6xl font-bold text-white sm:text-8xl">{countdown}</span>
           </motion.div>
         )}
       </AnimatePresence>
 
-      <div className="grid gap-6 lg:grid-cols-3">
-        <div className="space-y-6 lg:col-span-2">
+      <div className="grid min-w-0 gap-4 sm:gap-6 lg:grid-cols-3">
+        <div className="min-w-0 space-y-4 sm:space-y-6 lg:col-span-2">
           <GlassCard glow={isRecording}>
             <div
               className={
                 mirrorMode
-                  ? "grid grid-cols-2 gap-4 py-6 items-center"
-                  : "flex flex-col items-center py-6"
+                  ? "grid grid-cols-1 items-center gap-4 py-4 sm:grid-cols-2 sm:py-6"
+                  : "flex flex-col items-center py-4 sm:py-6"
               }
             >
               <div className="flex flex-col items-center">
@@ -303,7 +309,7 @@ export function PracticeSession({ userId }: { userId: string }) {
                   type="button"
                   whileTap={{ scale: 0.95 }}
                   onClick={isRecording ? stopSession : startSession}
-                  className={`relative flex h-24 w-24 items-center justify-center rounded-full ${
+                  className={`relative flex h-20 w-20 min-h-[44px] min-w-[44px] items-center justify-center rounded-full sm:h-24 sm:w-24 ${
                     isRecording
                       ? "bg-red-500/20 ring-4 ring-red-500/30"
                       : "bg-violet-500/20 ring-4 ring-violet-500/30"
@@ -341,7 +347,7 @@ export function PracticeSession({ userId }: { userId: string }) {
 
           {teleprompterText && (
             <GlassCard>
-              <p className="text-center text-lg leading-relaxed text-zinc-300">
+              <p className="break-words text-center text-base leading-relaxed text-zinc-300 sm:text-lg">
                 {teleprompterText}
               </p>
             </GlassCard>
@@ -358,14 +364,14 @@ export function PracticeSession({ userId }: { userId: string }) {
           </GlassCard>
         </div>
 
-        <div className="space-y-6">
+        <div className="min-w-0 space-y-4 sm:space-y-6">
           <GlassCard>
-            <div className="flex flex-wrap justify-around gap-4">
+            <div className="flex flex-wrap justify-center gap-3 sm:justify-around sm:gap-4">
               <ScoreRing label="Overall" value={metrics.overallScore} color="#8b5cf6" />
               <ScoreRing label="Clarity" value={metrics.clarityScore} color="#22d3ee" />
               <ScoreRing label="Energy" value={metrics.energyScore} color="#f472b6" />
             </div>
-            <div className="mt-4 grid grid-cols-2 gap-3 text-center text-sm">
+            <div className="mt-4 grid grid-cols-2 gap-2 text-center text-xs sm:gap-3 sm:text-sm">
               <div className="rounded-lg bg-white/[0.03] p-2">
                 <p className="text-zinc-500">Confidence</p>
                 <p className="font-bold text-white">{metrics.confidenceScore}</p>

@@ -22,7 +22,7 @@ export function ActivityFeed() {
               key={a.id}
               className="flex items-start justify-between gap-2 text-xs"
             >
-              <span className="text-zinc-400">{a.message}</span>
+              <span className="min-w-0 break-words text-zinc-400">{a.message}</span>
               <span className="shrink-0 text-zinc-600">
                 {formatDistanceToNow(a.timestamp, { addSuffix: true })}
               </span>

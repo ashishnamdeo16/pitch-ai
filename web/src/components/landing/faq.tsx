@@ -28,9 +28,9 @@ export function FAQ() {
   const [open, setOpen] = useState<number | null>(0);
 
   return (
-    <section id="faq" className="px-6 py-24">
-      <div className="mx-auto max-w-2xl">
-        <h2 className="text-center text-3xl font-bold text-white">FAQ</h2>
+    <section id="faq" className="px-4 py-16 sm:px-6 sm:py-24">
+      <div className="mx-auto w-full max-w-2xl">
+        <h2 className="text-center text-2xl font-bold text-white sm:text-3xl">FAQ</h2>
         <div className="mt-12 space-y-3">
           {faqs.map((faq, i) => (
             <div
@@ -40,7 +40,7 @@ export function FAQ() {
               <button
                 type="button"
                 onClick={() => setOpen(open === i ? null : i)}
-                className="flex w-full items-center justify-between px-5 py-4 text-left text-sm font-medium text-white"
+                className="flex min-h-11 w-full items-center justify-between gap-3 px-4 py-4 text-left text-sm font-medium text-white sm:px-5"
               >
                 {faq.q}
                 <ChevronDown

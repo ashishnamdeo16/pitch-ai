@@ -40,11 +40,11 @@ export function AnalyticsCharts() {
   const hasSessions = (data?.totalSessions ?? 0) > 0;
 
   return (
-    <div className="p-8">
-      <h1 className="text-2xl font-bold text-white">Analytics</h1>
+    <div className="page-shell max-w-full">
+      <h1 className="text-xl font-bold text-white sm:text-2xl">Analytics</h1>
       <p className="mt-1 text-zinc-500">Track your pitch improvement over time</p>
 
-      <div className="mt-8 grid gap-4 md:grid-cols-3">
+      <div className="mt-6 grid grid-cols-1 gap-4 sm:mt-8 sm:grid-cols-2 md:grid-cols-3">
         {[
           {
             label: "Avg Score",
@@ -70,7 +70,7 @@ export function AnalyticsCharts() {
               <span className="text-sm text-zinc-500">{s.label}</span>
               <s.icon className="h-4 w-4 text-violet-400" />
             </div>
-            <p className="mt-2 text-3xl font-bold text-white">
+            <p className="mt-2 text-2xl font-bold text-white sm:text-3xl">
               {s.value}
               <span className="text-lg text-zinc-500">{s.suffix}</span>
             </p>
@@ -90,10 +90,13 @@ export function AnalyticsCharts() {
           </p>
         </GlassCard>
       ) : (
-        <div className="mt-8 grid gap-6 lg:grid-cols-2">
-          <GlassCard>
-            <h2 className="mb-4 font-semibold text-white">Pitch score over time</h2>
-            <ResponsiveContainer width="100%" height={280}>
+        <div className="mt-6 grid gap-4 sm:mt-8 sm:gap-6 lg:grid-cols-2">
+          <GlassCard className="min-w-0">
+            <h2 className="mb-4 text-sm font-semibold text-white sm:text-base">
+              Pitch score over time
+            </h2>
+            <div className="h-[220px] w-full min-w-0 sm:h-[280px]">
+            <ResponsiveContainer width="100%" height="100%">
               <AreaChart data={scoreHistory}>
                 <defs>
                   <linearGradient id="scoreGrad" x1="0" y1="0" x2="0" y2="1">
@@ -120,11 +123,15 @@ export function AnalyticsCharts() {
                 />
               </AreaChart>
             </ResponsiveContainer>
+            </div>
           </GlassCard>
 
-          <GlassCard>
-            <h2 className="mb-4 font-semibold text-white">Filler word trend</h2>
-            <ResponsiveContainer width="100%" height={280}>
+          <GlassCard className="min-w-0">
+            <h2 className="mb-4 text-sm font-semibold text-white sm:text-base">
+              Filler word trend
+            </h2>
+            <div className="h-[220px] w-full min-w-0 sm:h-[280px]">
+            <ResponsiveContainer width="100%" height="100%">
               <BarChart data={fillerTrend}>
                 <CartesianGrid strokeDasharray="3 3" stroke="rgba(255,255,255,0.06)" />
                 <XAxis dataKey="session" stroke="#71717a" fontSize={12} />
@@ -139,6 +146,7 @@ export function AnalyticsCharts() {
                 <Bar dataKey="fillers" fill="#f59e0b" radius={[6, 6, 0, 0]} />
               </BarChart>
             </ResponsiveContainer>
+            </div>
           </GlassCard>
         </div>
       )}

@@ -67,13 +67,13 @@ export function InvestorSimulation({ userId }: { userId: string }) {
   };
 
   return (
-    <div className="p-8">
-      <h1 className="text-2xl font-bold text-white">Investor Simulation</h1>
+    <div className="page-shell max-w-full">
+      <h1 className="text-xl font-bold text-white sm:text-2xl">Investor Simulation</h1>
       <p className="mt-1 text-zinc-500">
         Practice with AI investors — dynamic follow-up questioning in real time
       </p>
 
-      <div className="mt-8 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+      <div className="mt-6 grid grid-cols-1 gap-3 sm:mt-8 sm:grid-cols-2 sm:gap-4 lg:grid-cols-3">
         {INVESTOR_PERSONALITIES.map((p) => (
           <motion.button
             key={p.id}
@@ -101,12 +101,12 @@ export function InvestorSimulation({ userId }: { userId: string }) {
       </div>
 
       <GlassCard className="mt-8">
-        <div className="flex flex-wrap items-center justify-between gap-4">
+        <div className="flex flex-col gap-4 sm:flex-row sm:flex-wrap sm:items-center sm:justify-between">
           <div className="flex items-center gap-2 text-sm text-zinc-400">
             <MessageCircle className="h-4 w-4" />
             Active: {INVESTOR_PERSONALITIES.find((p) => p.id === investorPersonality)?.name || "None"}
           </div>
-          <Button onClick={handleAsk} disabled={asking}>
+          <Button onClick={handleAsk} disabled={asking} className="w-full sm:w-auto">
             <Send className="h-4 w-4" />
             {asking ? "Connecting…" : "Ask investor question"}
           </Button>

@@ -19,8 +19,8 @@ export default function SettingsPage() {
   }
 
   return (
-    <div className="p-8">
-      <h1 className="text-2xl font-bold text-white">Settings</h1>
+    <div className="page-shell max-w-full">
+      <h1 className="text-xl font-bold text-white sm:text-2xl">Settings</h1>
       <p className="mt-1 text-zinc-500">Customize your practice experience</p>
 
       <div className="mt-8 max-w-xl space-y-6">

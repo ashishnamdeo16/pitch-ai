@@ -39,16 +39,16 @@ export default function SignupPage() {
   }
 
   return (
-    <main className="relative flex min-h-screen items-center justify-center px-6">
+    <main className="relative flex min-h-[100dvh] w-full max-w-[100vw] items-center justify-center overflow-x-hidden px-4 py-8 sm:px-6">
       <MeshBackground />
-      <GlassCard className="w-full max-w-md">
+      <GlassCard className="mx-auto w-full max-w-md">
         <div className="mb-8 flex items-center justify-center gap-2">
           <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-gradient-to-br from-violet-600 to-indigo-600">
             <Zap className="h-5 w-5 text-white" />
           </div>
           <span className="text-xl font-semibold text-white">PitchPilot AI</span>
         </div>
-        <h1 className="text-center text-2xl font-bold text-white">
+        <h1 className="text-center text-xl font-bold text-white sm:text-2xl">
           Start practicing free
         </h1>
         <p className="mt-2 text-center text-sm text-zinc-500">

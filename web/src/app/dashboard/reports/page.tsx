@@ -77,8 +77,8 @@ export default function ReportsPage() {
   }
 
   return (
-    <div className="p-8">
-      <h1 className="text-2xl font-bold text-white">Reports</h1>
+    <div className="page-shell max-w-full">
+      <h1 className="text-xl font-bold text-white sm:text-2xl">Reports</h1>
       <p className="mt-1 text-zinc-500">Export or delete pitch performance reports</p>
 
       <div className="mt-8 space-y-4">
@@ -90,8 +90,11 @@ export default function ReportsPage() {
           </GlassCard>
         ) : (
           sessions.map((s) => (
-            <GlassCard key={s.id} className="flex items-center justify-between gap-4">
-              <div className="flex min-w-0 items-center gap-4">
+            <GlassCard
+              key={s.id}
+              className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between"
+            >
+              <div className="flex min-w-0 items-center gap-3 sm:gap-4">
                 <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-xl bg-violet-500/20">
                   <FileText className="h-6 w-6 text-violet-400" />
                 </div>
@@ -103,10 +106,11 @@ export default function ReportsPage() {
                   </p>
                 </div>
               </div>
-              <div className="flex shrink-0 gap-2">
+              <div className="flex w-full shrink-0 flex-col gap-2 sm:w-auto sm:flex-row">
                 <Button
                   variant="secondary"
                   size="sm"
+                  className="w-full sm:w-auto"
                   disabled={loading === s.id || deleting === s.id}
                   onClick={() => exportPdf(s.id)}
                 >
@@ -116,6 +120,7 @@ export default function ReportsPage() {
                 <Button
                   variant="danger"
                   size="sm"
+                  className="w-full sm:w-auto"
                   disabled={loading === s.id || deleting === s.id}
                   onClick={() => deleteReport(s.id, s.title)}
                 >

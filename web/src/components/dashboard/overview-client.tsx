@@ -42,12 +42,12 @@ export function DashboardOverview({
       : metrics.overallScore;
 
   return (
-    <div className="p-8">
+    <div className="page-shell max-w-full">
       <motion.div
         initial={{ opacity: 0, y: 12 }}
         animate={{ opacity: 1, y: 0 }}
       >
-        <h1 className="text-2xl font-bold text-white">
+        <h1 className="text-xl font-bold text-white sm:text-2xl">
           Welcome back, {userName}
         </h1>
         <p className="mt-1 text-zinc-500">
@@ -55,7 +55,7 @@ export function DashboardOverview({
         </p>
       </motion.div>
 
-      <div className="mt-8 grid gap-6 md:grid-cols-3">
+      <div className="mt-6 grid grid-cols-1 gap-4 sm:mt-8 sm:gap-6 sm:grid-cols-2 md:grid-cols-3">
         {[
           { label: "Avg Score", value: avgScore, icon: TrendingUp, suffix: "/100" },
           { label: "Sessions", value: sessions.length, icon: Mic, suffix: "" },
@@ -71,7 +71,7 @@ export function DashboardOverview({
                 <span className="text-sm text-zinc-500">{stat.label}</span>
                 <stat.icon className="h-4 w-4 text-violet-400" />
               </div>
-              <p className="mt-2 text-3xl font-bold text-white">
+              <p className="mt-2 text-2xl font-bold text-white sm:text-3xl">
                 {stat.value}
                 <span className="text-lg text-zinc-500">{stat.suffix}</span>
               </p>
@@ -80,9 +80,9 @@ export function DashboardOverview({
         ))}
       </div>
 
-      <div className="mt-8 grid gap-6 lg:grid-cols-3">
-        <GlassCard className="lg:col-span-2">
-          <div className="mb-4 flex items-center justify-between">
+      <div className="mt-6 grid gap-4 sm:mt-8 sm:gap-6 lg:grid-cols-3">
+        <GlassCard className="min-w-0 lg:col-span-2">
+          <div className="mb-4 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
             <h2 className="font-semibold text-white">Recent sessions</h2>
             <Link href="/dashboard/practice">
               <Button size="sm">
@@ -103,16 +103,16 @@ export function DashboardOverview({
               {sessions.map((s) => (
                 <div
                   key={s.id}
-                  className="flex items-center justify-between rounded-xl border border-white/[0.06] bg-white/[0.02] px-4 py-3"
+                  className="flex flex-col gap-2 rounded-xl border border-white/[0.06] bg-white/[0.02] px-4 py-3 sm:flex-row sm:items-center sm:justify-between"
                 >
-                  <div>
-                    <p className="text-sm font-medium text-white">{s.title}</p>
+                  <div className="min-w-0">
+                    <p className="truncate text-sm font-medium text-white">{s.title}</p>
                     <p className="text-xs text-zinc-500">
                       {new Date(s.createdAt).toLocaleDateString()} ·{" "}
                       {formatDuration(s.durationSeconds)} · {s.mode}
                     </p>
                   </div>
-                  <div className="text-right">
+                  <div className="shrink-0 text-left sm:text-right">
                     <p className="text-lg font-bold text-violet-400">
                       {s.overallScore ?? "—"}
                     </p>

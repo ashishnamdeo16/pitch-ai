@@ -11,7 +11,7 @@ interface WaveformProps {
 
 export function Waveform({ isActive, bars = 24, className }: WaveformProps) {
   return (
-    <div className={cn("flex h-16 items-center justify-center gap-[3px]", className)}>
+    <div className={cn("flex h-12 w-full max-w-full items-center justify-center gap-[2px] sm:h-16 sm:gap-[3px]", className)}>
       {Array.from({ length: bars }).map((_, i) => (
         <motion.div
           key={i}
